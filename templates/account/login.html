@@ -1,0 +1,142 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% load socialaccount %}
+
+{% load bootstrap4 %}
+
+{% block content %}
+<header class="p-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <!-- Google Logo (في الهيدر) -->
+      <a href="/" class="d-none d-md-block">
+          <img src="{% static 'img/logo.jpg' %}" alt="Google Logo" class="logo-img" style="max-width: 150px;">
+      </a>
+      <div class="flex-grow-1"></div>
+      <!-- Login/Profile Dropdown -->
+      <div class="d-flex justify-content-end me-3">
+        {% if user.is_authenticated %}
+          <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle shadow-sm" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-user-circle me-1"></i> Profile
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="profileDropdown">
+              <li>
+                <a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                  <i class="fas fa-user me-2"></i> View Profile
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{% url 'accounts:profile_edit' %}">
+                  <i class="fas fa-edit me-2"></i> Edit Profile
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <form method="post" action="{% url 'account_logout' %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item text-danger">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                  </button>
+                </form>
+              </li>
+            </ul>
+          </div>
+        {% else %}
+          <a href="{% url 'account_login' %}" class="btn btn-success shadow-sm">
+            <i class="fas fa-sign-in-alt me-1"></i> Log in
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+<div class="container mt-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg p-4 rounded">
+                <h2 class="text-center mb-4">Login</h2>
+                
+                {% if form.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        <strong>Oops!</strong> Your username and password didn't match. Please try again.
+                    </div>
+                {% endif %}
+                
+                {% if next %}
+                    {% if user.is_authenticated %}
+                        <div class="alert alert-warning" role="alert">
+                            Your account doesn't have access to this page. Please login with an authorized account.
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info" role="alert">
+                            Please login to access this page.
+                        </div>
+                    {% endif %}
+                {% endif %}
+                
+                <form method="post" action="{% url 'account_login' %}">
+                    {% csrf_token %}
+                    {% bootstrap_form form %}
+                    
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                    <input type="hidden" name="next" value="{{ next }}">
+                </form>
+                
+                <div class="text-center mt-3">
+                    <a href="" class="text-muted">نسيت كلمة المرور؟</a>
+                </div>
+                
+                <div class="separator my-4">
+                    <div class="line"></div>
+                    <div class="separator-text">أو</div>
+                    <div class="line"></div>
+                </div>
+                
+                <div class="social-login text-center">
+                    <p class="mb-3">تسجيل الدخول باستخدام</p>
+                    <a href="{% provider_login_url 'google' %}" class="btn btn-outline-secondary btn-google">
+                        <img src="{% static 'img/s.JPEG' %}" alt="Google" width="18" height="18" class="mr-2">
+                        تسجيل الدخول باستخدام Google
+                    </a>
+                </div>
+                
+                
+                <style>
+                    .separator {
+                        display: flex;
+                        align-items: center;
+                        text-align: center;
+                    }
+                    
+                    .separator .line {
+                        flex: 1;
+                        height: 1px;
+                        background-color: #dee2e6;
+                    }
+                    
+                    .separator-text {
+                        padding: 0 1rem;
+                        color: #6c757d;
+                        font-size: 0.875rem;
+                    }
+                    
+                    .btn-google {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 0.5rem 1.5rem;
+                        font-weight: 500;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .btn-google:hover {
+                        background-color: #f8f9fa;
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                    }
+                </style>
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

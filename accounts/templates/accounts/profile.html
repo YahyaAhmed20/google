@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block body %}
+<header class="p-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <!-- Google Logo (في الهيدر) -->
+      <a href="/" class="d-none d-md-block">
+          <img src="{% static 'img/logo.jpg' %}" alt="Google Logo" class="logo-img" style="max-width: 150px;">
+      </a>
+      <div class="flex-grow-1"></div>
+      <!-- Login/Profile Dropdown -->
+      <div class="d-flex justify-content-end me-3">
+        {% if user.is_authenticated %}
+          <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle shadow-sm" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-user-circle me-1"></i> Profile
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="profileDropdown">
+              <li>
+                <a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                  <i class="fas fa-user me-2"></i> View Profile
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{% url 'accounts:profile_edit' %}">
+                  <i class="fas fa-edit me-2"></i> Edit Profile
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <form method="post" action="{% url 'account_logout' %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item text-danger">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                  </button>
+                </form>
+              </li>
+            </ul>
+          </div>
+        {% else %}
+          <a href="{% url 'account_login' %}" class="btn btn-success shadow-sm">
+            <i class="fas fa-sign-in-alt me-1"></i> Log in
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+<!-- Hero Profile Area -->
+<div class="bradcam_area bradcam_bg_1 position-relative" style="margin-top: -56px; padding-top: 56px;">
+    <div class="overlay bg-dark opacity-50 position-absolute w-10 h-50"></div>
+    <div class="container position-relative">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="bradcam_text text-center py-5">
+                    <h2 class="text-white font-weight-bold mb-4">{{job}}</h2>
+                    <div class="badge badge-primary px-4 py-2">Premium Member</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/ Hero Profile Area End -->
+
+<div class="job_details_area py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="profile-card shadow-lg rounded-lg overflow-hidden">
+                    <!-- Profile Header -->
+                    <div class="profile-header bg-primary p-4 d-flex align-items-center">
+                        <div class="profile-image-container mr-4">
+                            {% if profile.image %}
+                            <img src="{{ profile.image.url }}" alt="{{ profile.user.username }}'s Profile Picture" 
+                                class="profile-image border-4 border-white shadow" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+                            {% else %}
+                            <img src="{% static 'dist/img/photo1.png' %}" alt="Default Profile" 
+                                class="profile-image border-4 border-white shadow" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+                            {% endif %}
+                        </div>
+                        <div class="profile-title">
+                            <h3 class="text-white font-weight-bold mb-1">{{profile}}</h3>
+                            <span class="badge badge-light px-3 py-2"><i class="fas fa-check-circle text-success mr-1"></i> Verified Profile</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Profile Content -->
+                    <div class="profile-body p-4">
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h4 class="mb-0"><i class="fas fa-user-circle mr-2 text-primary"></i> Profile Summary</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="profile-info-item">
+                                            <label class="text-muted small text-uppercase">Full Name</label>
+                                            <p class="font-weight-bold mb-0">{{profile}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="profile-info-item">
+                                            <label class="text-muted small text-uppercase">Email Address</label>
+                                            <p class="font-weight-bold mb-0">{{profile.user.email}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="profile-info-item">
+                                            <label class="text-muted small text-uppercase">Phone Number</label>
+                                            <p class="font-weight-bold mb-0">{{profile.phone_number}}</p>
+                                        </div>
+                                    </div>
+                                    {% comment %} <div class="col-md-6 mb-3">
+                                        <div class="profile-info-item">
+                                            <label class="text-muted small text-uppercase">Location</label>
+                                            <p class="font-weight-bold mb-0"><i class="fas fa-map-marker-alt text-danger mr-1"></i> {{profile.city}}</p>
+                                        </div>
+                                    </div> {% endcomment %}
+                                    {% comment %} <div class="col-12 mb-3">
+                                        <div class="profile-info-item">
+                                            <label class="text-muted small text-uppercase">Disability Type</label>
+                                            <p class="font-weight-bold mb-0">{{profile.disability_type}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="profile-info-item">
+                                            <label class="text-muted small text-uppercase">Curriculum Vitae</label>
+                                            <div>
+                                                {% if profile.cv %}
+                                                <a href="{{ profile.cv.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-file-download mr-1"></i> Download CV
+                                                </a>
+                                                {% else %}
+                                                <span class="text-muted"><i class="fas fa-exclamation-circle mr-1"></i> No CV uploaded</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div> {% endcomment %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Premium Member Features -->
+                        <div class="card mb-4 bg-light border-0">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="text-primary mb-0"><i class="fas fa-star mr-2"></i> Premium Benefits</h5>
+                                    <span class="badge badge-warning px-3 py-2">EXCLUSIVE</span>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-check-circle text-success mr-2"></i>
+                                            <span>Priority Profile Visibility</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-check-circle text-success mr-2"></i>
+                                            <span>Enhanced Support</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-check-circle text-success mr-2"></i>
+                                            <span>Exclusive Opportunities</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-check-circle text-success mr-2"></i>
+                                            <span>Personalized Recommendations</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="profile-actions">
+                            <a class="btn btn-primary btn-lg btn-block" href="{% url 'accounts:profile_edit' %}">
+                                <i class="fas fa-user-edit mr-2"></i> Edit Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS for additional styling -->
+<style>
+    .bradcam_area {
+        margin-top: -56px; /* Adjust this value based on your navbar height */
+        padding-top: 56px; /* Ensure content doesn't overlap with the navbar */
+    }
+
+    .profile-card {
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .profile-header {
+        position: relative;
+    }
+    
+    .profile-image {
+        transition: all 0.3s ease;
+    }
+    
+    .profile-image:hover {
+        transform: scale(1.05);
+    }
+    
+    .profile-info-item {
+        padding-bottom: 10px;
+    }
+    
+    .profile-actions {
+        margin-top: 20px;
+    }
+    
+    .badge {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+</style>
+{% endblock body %}

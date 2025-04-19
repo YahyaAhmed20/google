@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap4 %}
+
+
+{% block body %}
+
+<header class="p-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <!-- Google Logo (في الهيدر) -->
+      <a href="/" class="d-none d-md-block">
+          <img src="{% static 'img/logo.jpg' %}" alt="Google Logo" class="logo-img" style="max-width: 150px;">
+      </a>
+      <div class="flex-grow-1"></div>
+      <!-- Login/Profile Dropdown -->
+      <div class="d-flex justify-content-end me-3">
+        {% if user.is_authenticated %}
+          <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle shadow-sm" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-user-circle me-1"></i> Profile
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="profileDropdown">
+              <li>
+                <a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                  <i class="fas fa-user me-2"></i> View Profile
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{% url 'accounts:profile_edit' %}">
+                  <i class="fas fa-edit me-2"></i> Edit Profile
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <form method="post" action="{% url 'account_logout' %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item text-danger">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                  </button>
+                </form>
+              </li>
+            </ul>
+          </div>
+        {% else %}
+          <a href="{% url 'account_login' %}" class="btn btn-success shadow-sm">
+            <i class="fas fa-sign-in-alt me-1"></i> Log in
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+
+<style>
+    .alert { display: none; }
+  </style>
+<!-- bradcam_area  -->
+<div class="bradcam_area bradcam_bg_1">
+    <div class="container">
+        <div class="text-center">
+            <h2 class="text-white">Edit Your Profile</h2>
+            <p class="text-white">Update your information to keep your profile up-to-date.</p>
+        </div>
+    </div>
+</div>
+<!--/ bradcam_area  -->
+
+<div class="job_details_area">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 mx-auto">
+                <div class="apply_job_form white-bg p-4 rounded shadow-sm">
+                    <h4 class="text-center mb-4">Edit Profile</h4>
+                    
+                    <!-- Display success or error messages -->
+                    {% if messages %}
+                        <div class="alert alert-info">
+                            {% for message in messages %}
+                                <p class="mb-0">{{ message }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form method="POST" class="form" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- User Form -->
+                        <div class="mb-4">
+                            <h5 class="text-primary">User Information</h5>
+                            {% bootstrap_form userform layout='horizontal' %}
+                        </div>
+
+                        <!-- Profile Form -->
+                        <div class="mb-4">
+                            <h5 class="text-primary">Profile Details</h5>
+                            {% bootstrap_form profileform layout='horizontal' %}
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-center">
+                            {% buttons %}
+                                <button type="submit" class="boxed-btn3 w-100">Save Changes</button>
+                            {% endbuttons %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock body %}
