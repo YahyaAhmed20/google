@@ -13,6 +13,8 @@ urlpatterns = [
     path('extract-text/', extract_text, name='extract_text'),
     path('extract/', views.extract_page, name='extract_page'),
     path('chatbot/', chatbot, name='chatbot'),
+    path('process-image/', views.process_image, name='process_image'),
+
 
 
 

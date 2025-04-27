@@ -20,6 +20,14 @@ from django.contrib.auth.decorators import login_required
 from .models import Shortcut
 from .forms import ShortcutForm
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from PIL import Image, ImageEnhance, ImageFilter
+import os
+import base64
+import io
+from django.conf import settings
+import uuid
 
 
 # Create your views here.
@@ -136,3 +144,74 @@ def chatbot(request):
                 response = f"Sorry, I encountered an error: {str(e)}"
         
         return JsonResponse({'response': response})
+    
+
+@csrf_exempt
+def process_image(request):
+    if request.method == 'POST' and request.FILES.get('process_image'):
+        try:
+            image_file = request.FILES['process_image']
+            filter_type = request.POST.get('filter_type', 'enhance')
+            intensity = float(request.POST.get('intensity', 5)) / 5.0
+            
+            # فتح الصورة باستخدام Pillow
+            img = Image.open(image_file)
+            
+            # تطبيق الفلتر المختار
+            if filter_type == 'enhance':
+                # تحسين تلقائي
+                enhancer = ImageEnhance.Color(img)
+                img = enhancer.enhance(intensity)
+                enhancer = ImageEnhance.Contrast(img)
+                img = enhancer.enhance(intensity)
+                enhancer = ImageEnhance.Brightness(img)
+                img = enhancer.enhance(intensity)
+                enhancer = ImageEnhance.Sharpness(img)
+                img = enhancer.enhance(intensity)
+            elif filter_type == 'sharpen':
+                # تحسين الحدة
+                enhancer = ImageEnhance.Sharpness(img)
+                img = enhancer.enhance(intensity * 2)
+            elif filter_type == 'brightness':
+                # زيادة السطوع
+                enhancer = ImageEnhance.Brightness(img)
+                img = enhancer.enhance(intensity * 1.5)
+            elif filter_type == 'contrast':
+                # تحسين التباين
+                enhancer = ImageEnhance.Contrast(img)
+                img = enhancer.enhance(intensity * 1.5)
+            elif filter_type == 'bw':
+                # تحويل للأبيض والأسود
+                img = img.convert('L')
+            elif filter_type == 'vintage':
+                # فلتر قديم
+                img = img.convert('RGB')
+                # إنشاء طبقة صفراء خفيفة
+                sepia = Image.new('RGB', img.size, (255, 240, 192))
+                # دمج الطبقة مع الصورة الأصلية
+                alpha = intensity * 0.6  # شفافية الطبقة
+                img = Image.blend(img, sepia, alpha)
+            
+            # إنشاء مخرج مؤقت لحفظ الصورة بدون الحاجة للكتابة على القرص
+            output = io.BytesIO()
+            img.save(output, format='JPEG')
+            output.seek(0)
+            
+            # تحويل الصورة إلى Base64 لإرجاعها مباشرة
+            image_data = base64.b64encode(output.getvalue()).decode('utf-8')
+            image_url = f"data:image/jpeg;base64,{image_data}"
+            
+            return JsonResponse({
+                'processed_image_url': image_url,
+                'success': True
+            })
+                
+        except Exception as e:
+            import traceback
+            error_details = traceback.format_exc()
+            return JsonResponse({
+                'error': str(e),
+                'details': error_details
+            }, status=400)
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)

@@ -393,8 +393,10 @@
               </ul>
             </div>
           {% else %}
-            <a href="{% url 'account_login' %}" class="btn btn-success shadow-sm">
-              <i class="fas fa-sign-in-alt me-1"></i> Log in
+          <div class="d-grid gap-2">
+            <a href="{% url 'account_login' %}" class="btn btn-success">Log in</a>
+            <a href="{% url 'account_signup' %}" class="btn btn-outline-primary">Sign Up</a>
+        </div>
             </a>
           {% endif %}
         </div>
@@ -426,8 +428,11 @@
                   <!-- Buttons -->
                   <div class="d-flex justify-content-center gap-2 mb-4">
                       <button class="btn btn-outline-secondary" id="search">Google Search</button>
-                      <button class="btn btn-outline-secondary" id="length">Google Length</button>
+                      <button class="btn btn-outline-secondary" id="length">OCR</button>
+                      <button class="btn btn-outline-secondary" id="image-processing">Image Processing</button>
+
                   </div>
+
                   
 
                   <!-- Upload Section -->
@@ -445,6 +450,168 @@
           </div>
         </div>
 
+
+
+        <!-- Image Processing Section -->
+<div id="image-processing-section" style="display: none;">
+  <form id="image-processing-form" method="POST" enctype="multipart/form-data" class="text-center">
+      {% csrf_token %}
+      <h5 class="mb-3">Upload an image to enhance it</h5>
+      <input type="file" name="process_image" accept="image/*" required class="form-control mb-3" id="process-image-input">
+      
+      <div class="row mb-3">
+          <div class="col-md-6">
+              <label for="filter-type" class="form-label">Choose Enhancement</label>
+              <select class="form-select" id="filter-type" name="filter_type">
+                  <option value="enhance">Auto Enhance</option>
+                  <option value="sharpen">Sharpen</option>
+                  <option value="brightness">Increase Brightness</option>
+                  <option value="contrast">Improve Contrast</option>
+                  <option value="bw">Black & White</option>
+                  <option value="vintage">Vintage Filter</option>
+              </select>
+          </div>
+          <div class="col-md-6">
+              <label for="intensity" class="form-label">Effect Intensity</label>
+              <input type="range" class="form-range" min="1" max="10" value="5" id="intensity" name="intensity">
+          </div>
+      </div>
+      
+      <div class="row preview-container mb-3">
+          <div class="col-md-6">
+              <h6>Original Image</h6>
+              <img id="original-preview" alt="Original Image" class="img-fluid" style="max-height: 300px; display: none;">
+          </div>
+          <div class="col-md-6">
+              <h6>Enhanced Image</h6>
+              <img id="enhanced-preview" alt="Enhanced Image" class="img-fluid" style="max-height: 300px; display: none;">
+          </div>
+      </div>
+      
+      <div class="d-flex justify-content-center gap-2">
+          <button type="submit" class="btn btn-primary">Process Image</button>
+          <a id="download-enhanced" href="#" download="enhanced_image.jpg" class="btn btn-success" style="display: none;">
+              <i class="fas fa-download me-1"></i> Download Enhanced Image
+          </a>
+      </div>
+  </form>
+</div> 
+
+<script>
+  // إظهار قسم معالجة الصور عند النقر على زر Image Processing
+document.getElementById('image-processing').addEventListener('click', function () {
+  document.getElementById('upload-section').style.display = 'none';
+  document.getElementById('image-processing-section').style.display = 'block';
+});
+
+// معاينة الصورة الأصلية عند اختيارها
+document.getElementById('process-image-input').addEventListener('change', function (e) {
+  const file = e.target.files[0];
+  const preview = document.getElementById('original-preview');
+  if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+          // إخفاء صورة المعالجة والزر التحميل إذا تم تغيير الصورة
+          document.getElementById('enhanced-preview').style.display = 'none';
+          document.getElementById('download-enhanced').style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+  } else {
+      preview.style.display = 'none';
+  }
+});
+
+// معالجة النموذج عند الإرسال
+document.getElementById('image-processing-form').addEventListener('submit', function (e) {
+  e.preventDefault();
+  const submitButton = this.querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+  submitButton.innerHTML = 'Processing... <span class="spinner-border spinner-border-sm"></span>';
+
+  const formData = new FormData(this);
+
+  fetch('/process-image/', {
+      method: 'POST',
+      body: formData,
+      headers: {
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      }
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (data.error) {
+          alert(data.error);
+      } else {
+          // عرض الصورة المحسنة
+          const enhancedPreview = document.getElementById('enhanced-preview');
+          enhancedPreview.src = data.processed_image_url;
+          enhancedPreview.style.display = 'block';
+          
+          // تفعيل زر التحميل
+          const downloadBtn = document.getElementById('download-enhanced');
+          downloadBtn.href = data.processed_image_url;
+          downloadBtn.style.display = 'inline-block';
+      }
+  })
+  .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred while processing the image.');
+  })
+  .finally(() => {
+      submitButton.disabled = false;
+      submitButton.innerHTML = 'Process Image';
+  });
+});
+
+// إعادة إخفاء أقسام التحميل والمعالجة عند النقر على زر البحث
+document.getElementById('search').addEventListener('click', function () {
+  document.getElementById('upload-section').style.display = 'none';
+  document.getElementById('image-processing-section').style.display = 'none';
+});
+</script>
+
+
+<style>
+  /* تحسينات لقسم معالجة الصور */
+#image-processing-section {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 6px rgba(32, 33, 36, 0.1);
+}
+
+.preview-container img {
+    border: 1px solid #dfe1e5;
+    border-radius: 8px;
+    padding: 5px;
+    background-color: #f8f9fa;
+}
+
+.form-range::-webkit-slider-thumb {
+    background: #1a73e8;
+}
+
+.form-range::-moz-range-thumb {
+    background: #1a73e8;
+}
+
+/* أنيميشن للتحويل بين الصور الأصلية والمحسنة */
+#enhanced-preview {
+    transition: opacity 0.5s ease;
+}
+
+/* تنسيق زر التحميل */
+#download-enhanced {
+    transition: all 0.3s ease;
+}
+
+#download-enhanced:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+</style>
         <!--Bookmarks-->
         <div class="container mt-5">
           <ul class="bookmark row row-cols-2 row-cols-md-4 list-unstyled">
