@@ -1,13 +1,6 @@
 from django.db import models
 # Create your models here.
 
-
-# shortcut
-
-
-
-
-# models.py
 from django.db import models
 
 class Shortcut(models.Model):

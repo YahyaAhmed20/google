@@ -9,7 +9,7 @@ app_name='my_google'
 
 urlpatterns = [
     path('',views.google,name='my_google'),
-    path('', views.home_view, name='home'),  # Default home page
+    # path('', views.home_view, name='home'),  # Default home page
     path('extract-text/', extract_text, name='extract_text'),
     path('extract/', views.extract_page, name='extract_page'),
     path('chatbot/', chatbot, name='chatbot'),
